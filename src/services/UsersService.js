@@ -8,7 +8,7 @@ class UsersService {
     this._pool = new Pool();
   }
 
-  async addUser(username, password, fullname) {
+  async addUser({ username, password, fullname }) {
     const id = `user-${nanoid(16)}`;
     const hashedPassword = await bcrypt.hash(password, 10);
 
