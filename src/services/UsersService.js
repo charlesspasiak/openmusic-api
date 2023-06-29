@@ -9,6 +9,8 @@ class UsersService {
   }
 
   async addUser({ username, password, fullname }) {
+    await this.verifyNewUsername(username);
+
     const id = `user-${nanoid(16)}`;
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -24,6 +26,19 @@ class UsersService {
     }
 
     return result.rows[0].id;
+  }
+
+  async verifyNewUsername(username) {
+    const query = {
+      text: 'SELECT username FROM users WHERE username = $1',
+      values: [username],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (result.rows.length > 0) {
+      throw new InvariantError('Gagal menambahkan user. Username sudah digunakan.');
+    }
   }
 }
 

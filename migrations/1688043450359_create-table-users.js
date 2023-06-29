@@ -10,7 +10,6 @@ exports.up = (pgm) => {
     },
     username: {
       type: 'VARCHAR(50)',
-      unique: true,
       notNull: true,
     },
     password: {
