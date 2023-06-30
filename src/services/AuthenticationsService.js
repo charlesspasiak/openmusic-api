@@ -9,7 +9,7 @@ class AuthenticationsService {
   async addRefreshToken(token) {
     const query = {
       text: 'INSERT INTO authentications VALUES($1)',
-      vaues: [token],
+      values: [token],
     };
 
     await this._pool.query(query);
