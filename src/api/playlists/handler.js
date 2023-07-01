@@ -54,17 +54,26 @@ class PlaylistsHandler {
   async postSongHandler(request, h) {
     this._validator.validatePostSongPayload(request.payload);
     const { songId } = request.payload;
-    const { id } = request.params;
+    const { id: playlistId } = request.params;
 
     const { id: credentialId } = request.auth.credentials;
 
-    await this._playlistsService.verifyPlaylistOwner(id, credentialId);
+    await this._playlistsService.verifyPlaylistOwner(playlistId, credentialId);
 
     // cek lagu di database
     await this._songsService.getSongById(songId);
 
     // menambahkan lagu ke playlist
-    await this._playlistsService.addSongToPlaylist(id, songId);
+    await this._playlistsService.addSongToPlaylist(playlistId, songId);
+
+    // menambahkan aktivitas playlist
+    const action = 'add';
+    await this._playlistsService.addPlaylistActivity(
+      playlistId,
+      songId,
+      credentialId,
+      action,
+    );
 
     const response = h.response({
       status: 'success',
@@ -91,14 +100,23 @@ class PlaylistsHandler {
   }
 
   async deleteSongByIdHandler(request) {
-    const { id: playlisId } = request.params;
+    const { id: playlistId } = request.params;
     const { songId } = request.payload;
 
     const { id: credentialId } = request.auth.credentials;
 
-    await this._playlistsService.verifyPlaylistOwner(playlisId, credentialId);
+    await this._playlistsService.verifyPlaylistOwner(playlistId, credentialId);
 
-    await this._playlistsService.deleteSongFromPlaylist(playlisId, songId);
+    await this._playlistsService.deleteSongFromPlaylist(playlistId, songId);
+
+    // menambahkan aktivitas playlist
+    const action = 'delete';
+    await this._playlistsService.addPlaylistActivity(
+      playlistId,
+      songId,
+      credentialId,
+      action,
+    );
 
     return {
       status: 'success',
@@ -106,8 +124,21 @@ class PlaylistsHandler {
     };
   }
 
-  async getActivitiesHandler(request, h) {
+  async getActivitiesHandler(request) {
+    const { id: playlistId } = request.params;
+    const { id: credentialId } = request.auth.credentials;
 
+    await this._playlistsService.verifyPlaylistOwner(playlistId, credentialId);
+
+    const activities = await this._playlistsService.getPlaylistActivities(playlistId);
+
+    return {
+      status: 'success',
+      data: {
+        playlistId,
+        activities,
+      },
+    };
   }
 }
 
