@@ -19,7 +19,7 @@ class PlaylistsService {
 
     const result = await this._pool.query(query);
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new InvariantError('Playlist gagal ditambahkan');
     }
 
@@ -48,7 +48,7 @@ class PlaylistsService {
 
     const result = await this._pool.query(query);
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError('Playlist gagal dihapus. Id tidak ditemukan');
     }
   }
@@ -98,7 +98,7 @@ class PlaylistsService {
 
     const result = await this._pool.query(query);
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new InvariantError('Lagu gagal dihapus');
     }
   }
@@ -112,7 +112,7 @@ class PlaylistsService {
 
     const result = await this._pool.query(query);
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new InvariantError('gagal menambahkan aktivitas');
     }
   }
@@ -128,7 +128,6 @@ class PlaylistsService {
     };
 
     const result = await this._pool.query(query);
-    // console.log(result);
     return result.rows;
   }
 
@@ -140,7 +139,7 @@ class PlaylistsService {
 
     const result = await this._pool.query(query);
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError('Playlist tidak ditemukan');
     }
 
