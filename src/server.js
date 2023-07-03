@@ -52,14 +52,14 @@ const init = async () => {
     },
   });
 
-  // * Register plugin external ===============================================
+  // * Register plugin external
   await server.register([
     {
       plugin: Jwt,
     },
   ]);
 
-  // * Mendefinisikan strategy autentikasi jwt =================================
+  // ? Mendefinisikan strategy autentikasi jwt
   server.auth.strategy('openmusic_jwt', 'jwt', {
     keys: process.env.ACCESS_TOKEN_KEY,
     verify: {
@@ -76,7 +76,7 @@ const init = async () => {
     }),
   });
 
-  // * Register plugin =========================================================
+  // * Register plugin
 
   await server.register([
     {
@@ -128,9 +128,8 @@ const init = async () => {
       },
     },
   ]);
-  // * ===============================================================
 
-  // ! @ Error Handling ================================================================
+  // ! @ Error Handling
 
   server.ext('onPreResponse', (request, h) => {
     // mendapatkan konteks response dari request
@@ -165,7 +164,6 @@ const init = async () => {
     // jika bukan error, lanjutkan dengan response sebelumnya (tanpa terintervensi)
     return h.continue;
   });
-  // !==================================================================================
 
   await server.start();
   console.log(`Server berjalan pada ${server.info.uri}`);
