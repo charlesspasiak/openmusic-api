@@ -53,7 +53,6 @@ class PlaylistsService {
     }
   }
 
-  // ? Menambahkan lagu ke playlist
   async addSongToPlaylist(playlistId, songId) {
     const query = {
       text: 'INSERT INTO playlist_songs(playlist_id, song_id) VALUES($1, $2) RETURNING id',
@@ -67,7 +66,6 @@ class PlaylistsService {
     }
   }
 
-  // ? Melihat daftar lagu di dalam playlist
   async getSongsFromPlaylist(playlistId) {
     const playlist = await this._pool.query({
       text: `SELECT playlists.id, playlists.name, users.username FROM playlists
@@ -89,7 +87,6 @@ class PlaylistsService {
     };
   }
 
-  // ? Menghapus lagu dari playlist
   async deleteSongFromPlaylist(playlistId, songId) {
     const query = {
       text: 'DELETE FROM playlist_songs WHERE playlist_id = $1 AND song_id = $2 RETURNING id',
@@ -103,7 +100,6 @@ class PlaylistsService {
     }
   }
 
-  // ? Menambahkan aktivitas playlist
   async addPlaylistActivity(playlistId, songsId, userId, action) {
     const query = {
       text: 'INSERT INTO playlist_song_activities(playlist_id, song_id, user_id, action) VALUES($1, $2, $3, $4) RETURNING id',
@@ -117,7 +113,6 @@ class PlaylistsService {
     }
   }
 
-  // ? Melihat daftar aktivitas playlist
   async getPlaylistActivities(playlistId) {
     const query = {
       text: `SELECT users.username, songs.title, action, time FROM playlist_song_activities
@@ -150,7 +145,6 @@ class PlaylistsService {
     }
   }
 
-  // ? Memverifikasi akses playlist
   async verifyPlaylistAccess(playlistId, userId) {
     try {
       await this.verifyPlaylistOwner(playlistId, userId);
