@@ -5,8 +5,9 @@ const NotFoundError = require('../exceptions/NotFoundError');
 const { mapAlbumDBToModel } = require('../utils');
 
 class AlbumsService {
-  constructor() {
+  constructor(cacheService) {
     this._pool = new Pool();
+    this._cacheService = cacheService;
   }
 
   async addAlbum({ name, year }) {
@@ -122,6 +123,7 @@ class AlbumsService {
       values: [id, userId],
     });
 
+    await this._cacheService.delete(`user_album_likes:${id}`);
     return 'Berhasil menyukai album';
   }
 
@@ -137,7 +139,32 @@ class AlbumsService {
       throw new NotFoundError('Gagal unlike album');
     }
 
+    await this._cacheService.delete(`user_album_likes:${id}`);
     return 'Batal menyukai album';
+  }
+
+  async getAlbumLikesById(id) {
+    try {
+      const likes = await this._cacheService.get(`user_album_likes:${id}`);
+      return {
+        likes: +likes,
+        cached: true,
+      };
+    } catch (error) {
+      await this.isAlbumExist(id);
+
+      const result = await this._pool.query({
+        text: 'SELECT * FROM user_album_likes WHERE album_id = $1',
+        values: [id],
+      });
+
+      const likes = result.rowCount;
+      await this._cacheService.set(`user_album_likes:${id}`, likes);
+
+      return {
+        likes,
+      };
+    }
   }
 }
 
