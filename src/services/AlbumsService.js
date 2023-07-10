@@ -74,7 +74,7 @@ class AlbumsService {
     const result = await this._pool.query(query);
 
     if (!result.rowCount) {
-      throw new NotFoundError('Gagal memperbarui album. Id tidak ditemukan');
+      throw new NotFoundError('Gagal menghapus album. Id tidak ditemukan');
     }
   }
 
@@ -104,42 +104,40 @@ class AlbumsService {
     }
   }
 
-  async checkAlbumLikes(albumId, userId) {
-    await this.isAlbumExist(albumId);
+  async likeTheAlbum(id, userId) {
+    await this.isAlbumExist(id);
+    // Check if the user has already liked the album
+    const result = await this._pool.query(
+      'SELECT * FROM user_album_likes WHERE album_id = $1 AND user_id = $2',
+      [id, userId],
+    );
 
-    const query = {
-      text: 'SELECT album_id, user_id FROM user_album_likes WHERE album_id = $1 AND user_id = $2',
-      values: [albumId, userId],
-    };
-    const result = await this._pool.query(query);
-
-    if (!result.rowCount) {
-      await this.likeAlbum(albumId, userId);
-
-      return 'Menyukai album';
+    if (result.rowCount > 0) {
+      throw new InvariantError('Album telah disukai');
     }
 
-    await this.unlikeAlbum(albumId, userId);
+    // Insert the like into the user_album_likes table
+    await this._pool.query({
+      text: 'INSERT INTO user_album_likes (album_id, user_id) VALUES($1, $2) RETURNING id',
+      values: [id, userId],
+    });
+
+    return 'Berhasil menyukai album';
+  }
+
+  async unlikeTheAlbum(id, userId) {
+    await this.isAlbumExist(id);
+
+    const result = await this._pool.query({
+      text: 'DELETE FROM user_album_likes WHERE album_id = $1 AND user_id = $2',
+      values: [id, userId],
+    });
+
+    if (!result.rowCount) {
+      throw new NotFoundError('Gagal unlike album');
+    }
 
     return 'Batal menyukai album';
-  }
-
-  async likeAlbum(albumId, userId) {
-    const query = {
-      text: 'INSERT INTO user_album_likes VALUES($1, $2)',
-      values: [albumId, userId],
-    };
-
-    await this._pool.query(query);
-  }
-
-  async unlikeAlbum(albumId, userId) {
-    const query = {
-      text: 'DELETE FROM user_album_likes WHERE album_id = $1 AND user_id = $2',
-      values: [albumId, userId],
-    };
-
-    await this._pool.query(query);
   }
 }
 
