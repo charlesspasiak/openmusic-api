@@ -107,7 +107,7 @@ class AlbumsService {
 
   async likeTheAlbum(id, userId) {
     await this.isAlbumExist(id);
-    // Check if the user has already liked the album
+
     const result = await this._pool.query(
       'SELECT * FROM user_album_likes WHERE album_id = $1 AND user_id = $2',
       [id, userId],
@@ -117,7 +117,6 @@ class AlbumsService {
       throw new InvariantError('Album telah disukai');
     }
 
-    // Insert the like into the user_album_likes table
     await this._pool.query({
       text: 'INSERT INTO user_album_likes (album_id, user_id) VALUES($1, $2) RETURNING id',
       values: [id, userId],
@@ -151,8 +150,6 @@ class AlbumsService {
         cached: true,
       };
     } catch (error) {
-      await this.isAlbumExist(id);
-
       const result = await this._pool.query({
         text: 'SELECT * FROM user_album_likes WHERE album_id = $1',
         values: [id],
