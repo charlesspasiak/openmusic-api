@@ -1,8 +1,8 @@
 const { Pool } = require('pg');
 const { nanoid } = require('nanoid');
-const InvariantError = require('../exceptions/InvariantError');
-const NotFoundError = require('../exceptions/NotFoundError');
-const AuthorizationError = require('../exceptions/AuthorizationError');
+const InvariantError = require('../../exceptions/InvariantError');
+const NotFoundError = require('../../exceptions/NotFoundError');
+const AuthorizationError = require('../../exceptions/AuthorizationError');
 
 class PlaylistsService {
   constructor(collaborationsService) {
@@ -154,7 +154,10 @@ class PlaylistsService {
       }
 
       try {
-        await this._collaborationsService.verifyCollaborator(playlistId, userId);
+        await this._collaborationsService.verifyCollaborator(
+          playlistId,
+          userId,
+        );
       } catch {
         throw error;
       }
