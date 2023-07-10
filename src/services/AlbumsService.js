@@ -92,6 +92,55 @@ class AlbumsService {
       );
     }
   }
+
+  async isAlbumExist(albumId) {
+    const result = await this._pool.query({
+      text: 'SELECT * FROM albums WHERE id = $1',
+      values: [albumId],
+    });
+
+    if (!result.rowCount) {
+      throw new NotFoundError('Album tidak ditemukan');
+    }
+  }
+
+  async checkAlbumLikes(albumId, userId) {
+    await this.isAlbumExist(albumId);
+
+    const query = {
+      text: 'SELECT album_id, user_id FROM user_album_likes WHERE album_id = $1 AND user_id = $2',
+      values: [albumId, userId],
+    };
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      await this.likeAlbum(albumId, userId);
+
+      return 'Menyukai album';
+    }
+
+    await this.unlikeAlbum(albumId, userId);
+
+    return 'Batal menyukai album';
+  }
+
+  async likeAlbum(albumId, userId) {
+    const query = {
+      text: 'INSERT INTO user_album_likes VALUES($1, $2)',
+      values: [albumId, userId],
+    };
+
+    await this._pool.query(query);
+  }
+
+  async unlikeAlbum(albumId, userId) {
+    const query = {
+      text: 'DELETE FROM user_album_likes WHERE album_id = $1 AND user_id = $2',
+      values: [albumId, userId],
+    };
+
+    await this._pool.query(query);
+  }
 }
 
 module.exports = AlbumsService;
